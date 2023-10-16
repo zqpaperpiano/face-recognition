@@ -35,7 +35,7 @@ class Register extends React.Component {
     onSubmitRegistration = (e) => {
         e.preventDefault();
         if(this.validateInput()){
-            fetch('https://ziqing-face-recognition.onrender.com/face-recognition-api/register', {
+            fetch('https://ziqing-face-recognition.onrender.com/register', {
             method: 'post',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
