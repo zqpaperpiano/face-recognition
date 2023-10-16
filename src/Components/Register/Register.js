@@ -1,4 +1,6 @@
-import React from 'react'
+import userEvent from '@testing-library/user-event';
+import React from 'react';
+import { toast, ToastContainer } from 'react-toastify';
 
 class Register extends React.Component {
 
@@ -32,7 +34,8 @@ class Register extends React.Component {
 
     onSubmitRegistration = (e) => {
         e.preventDefault();
-        fetch('http://localhost:3000/register', {
+        if(this.validateInput()){
+            fetch('https://zqpaperpiano.github.io/face-recognition-api/register', {
             method: 'post',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
@@ -42,15 +45,45 @@ class Register extends React.Component {
             })
         })
         .then(resp => resp.json())
-        .then(status => {
-            console.log(status);
-            if(status === 'success'){
-                this.props.onRouteChange('signin');
+        .then(user => {
+            if(user._id){
+                this.props.loadUser(user);
+                this.props.onRouteChange('home');
         }
     })
         .catch(err => console.log(err))
+        }
+        
     }
 
+    validateInput= () => {
+        if(this.state.password === "" || this.state.registerEmail === "" || this.state.registerName === ""){
+            toast.error("Please fill in all fields", {
+                position: toast.POSITION.BOTTOM_CENTER
+            })
+            return false;
+        }
+
+        for( var char of this.state.registerName){
+            if(char === " "){
+                toast.error("Please do not have any spaces in your username!", {
+                    position: toast.POSITION.BOTTOM_CENTER
+                })
+                return false;
+            }
+        }
+
+
+        if(!/\S+@\S+\.\S+/.test(this.state.registerEmail)){
+            toast.error("Please enter a valid email", {
+                position: toast.POSITION.BOTTOM_CENTER
+            })
+            return false;
+        }
+
+        return true;
+    }
+    
     render(){
         return(
             <article className="br3 ba dark-gray b--black-10 mv4 w-100 w-60-m w-25-l mw5 shadow-5 center">
@@ -65,7 +98,7 @@ class Register extends React.Component {
                                 className="pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100" type="email" name="email-address"  id="email-address" />
                             </div>
                             <div className="mt3">
-                                <label className="db fw6 lh-copy f6" for="email-address">Name</label>
+                                <label className="db fw6 lh-copy f6" for="email-address">Username</label>
                                 <input
                                 onChange={this.onNameChange}
                                  className="pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100" type="text" />

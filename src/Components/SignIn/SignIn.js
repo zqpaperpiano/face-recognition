@@ -1,4 +1,5 @@
 import React from 'react';
+import { toast, ToastContainer } from 'react-toastify';
 
 class SignIn extends React.Component {
     constructor(props) {
@@ -25,7 +26,7 @@ class SignIn extends React.Component {
 
     onSubmitSignIn = (e) => {
         e.preventDefault();
-        fetch('http://localhost:3000/signin', {
+        fetch('https://zqpaperpiano.github.io/face-recognition-api/signin', {
             method: 'post',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
@@ -33,9 +34,22 @@ class SignIn extends React.Component {
                 password: this.state.password
             })
         })
-        .then(resp => resp.json())
+        .then(resp => {
+            // console.log(resp.status);
+            if(resp.status === 400){
+                toast.error("All fields must be filled in", {
+                    position: toast.POSITION.BOTTOM_CENTER
+                })
+            }else if(resp.status === 401){
+                toast.error("Incorrect email or password", {
+                    position: toast.POSITION.BOTTOM_CENTER
+                })
+            }
+            return resp.json()}
+            )
         .then(data => {
-            if(data[0].id){
+            // console.log('data: ', data);
+            if(data[0]._id){
                 this.props.loadUser(data[0]);
                 this.props.onRouteChange('home');
             }

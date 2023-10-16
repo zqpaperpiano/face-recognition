@@ -1,5 +1,7 @@
 import './App.css';
 import React from 'react';
+import { toast, ToastContainer } from 'react-toastify';
+import "react-toastify/dist/ReactToastify.css";
 import Navigation from './Components/Navigation/Navigation';
 import Logo from './Logo/Logo';
 import Rank from './Components/Rank/Rank';
@@ -11,6 +13,7 @@ import Register from './Components/Register/Register';
 
 const initialState ={
   input: '',
+  previousURL: '',
   imageURL: '',
   box: {},
   route: 'signin',
@@ -33,11 +36,11 @@ class App extends React.Component {
     this.setState(
       {
         user: {
-          id: data.id,
+          id: data._id,
           name: data.name, 
           email: data.email,
-          entries: data.entries,
-          joined: data.joined
+          entries: data.imageCount,
+          joined: data.joinedDate
         }
       }
     )
@@ -45,21 +48,57 @@ class App extends React.Component {
 
 
   calculateFaceLocation = (data) => {
-    const image = document.getElementById('inputImage');
-    const width = Number(image.width);
-    const height = Number(image.height);
+    console.log('calculate face location');
+    console.log(data);
+    if(data === "No face identified"){
+      toast("No face identified");
+      return null;
+    }else if(data === "Please enter a valid URL"){
+      toast('Please enter a valid URL');
+      return null;
+    }else{
+      // console.log('length of data: ', data.length);
+      const image = document.getElementById('inputImage');
+      const width = Number(image.width);
+      const height = Number(image.height);
     // console.log(width, height);
-    return {
-      leftCol: data.left_col * width,
-      topRow: data.top_row * height,
-      rightCol: width - (data.right_col * width),
-      bottomRow: height - (data.bottom_row * height)
+
+      var boxes = [];
+      var i = 0;
+      data.forEach((box) => {
+        const oneBox = box.region_info.bounding_box;
+        const newBox = {
+          leftCol: oneBox.left_col * width,
+          topRow: oneBox.top_row * height,
+          rightCol: width - (oneBox.right_col * width),
+          bottomRow: height - (oneBox.bottom_row * height)
+        }
+        boxes[i] = newBox;
+        // console.log(boxes);
+        ++i;
+      })
+
+      return boxes;
     }
+    
   }
 
-  displayFaceBox = (box) => {
-    // console.log(box);
-    this.setState({box: box})
+  displayFaceBox = (boxes) => {    
+    if(boxes != null){
+      const faceImage = document.getElementById("face-recognition");
+      boxes.forEach((box) => {
+      const topRow = `${box.topRow}px`;
+      const bottomRow = `${box.bottomRow}px`;
+      const rightCol = `${box.rightCol}px`;
+      const leftCol = `${box.leftCol}px`;
+      var newBox = document.createElement("div");
+      newBox.setAttribute("class", "bounding-box");
+      
+      newBox.style.cssText=`position:absolute;top:${topRow};right:${rightCol};left:${leftCol};bottom:${bottomRow}`;
+      faceImage.appendChild(newBox); 
+    })
+    }
+
   }
 
   onInputChange = (event) => {
@@ -69,11 +108,13 @@ class App extends React.Component {
   }
 
   onButtonSubmit = () => {
-    this.setState({
-      imageURL: this.state.input,
-    })
+    if(this.state.previousURL != this.state.input){
+      this.setState({
+        previousURL: this.state.input,
+        imageURL: this.state.input,
+      })
 
-    fetch('http://localhost:3000/imageurl', {
+    fetch('https://zqpaperpiano.github.io/face-recognition-api/imageurl', {
       method: 'post',
       headers:{'Content-Type': 'application/json'},
       body: JSON.stringify({
@@ -81,34 +122,52 @@ class App extends React.Component {
       })
     })
     .then(resp => {
-      if(resp){
-        fetch('http://localhost:3000/image', {
+      console.log(resp);
+      if(resp.status != 400){
+        console.log('entering...');
+        fetch('https://zqpaperpiano.github.io/face-recognition-api/image', {
           method: 'put',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({
-            id: this.state.user.id,
+            email: this.state.user.email
           })
         })
-        .then(count => count.json())
+        .then(count => {
+          return count.json()})
         .then(count => {
           this.setState(Object.assign(
             this.state.user,
             {entries: count}
           ))
         })
-        .catch(err => console.log(err))
+        .catch(err => console.log('error'))
       }
       return resp.json();
     })
     .then(data => 
+      {
+        var divs = document.getElementsByClassName("bounding-box");
+        // console.log(divs);
+        if(divs.length > 1){
+          // console.log('more than 1');
+          var length = divs.length;
+          // console.log('length: ', length);
+          const image = document.getElementById("face-recognition");
+          // console.log('current node before deletion: ', image.childNodes);
+          for(var i = length ; i > 0; --i){
+            image.removeChild(image.childNodes[i]);
+          }
+        }
+        // console.log(data)
       this.displayFaceBox(
         this.calculateFaceLocation(
           data
         )
-      )
+      )}
     )
     .catch(err => console.log(err))
   }
+}
 
   onRouteChange = (route) => {
     if(route === 'signin'){
@@ -133,7 +192,7 @@ class App extends React.Component {
           <ImageLinkForm 
           onInputChange={this.onInputChange} 
           onButtonSubmit={this.onButtonSubmit} />
-          <FaceRecognition box={this.state.box} imageURL={this.state.imageURL}/>
+          <FaceRecognition imageURL={this.state.imageURL}/>
         </div>
         : (
           this.state.route === 'signin' 
@@ -141,6 +200,7 @@ class App extends React.Component {
           : <Register onRouteChange = {this.onRouteChange} loadUser={this.loadUser} />
         )
       }
+      <ToastContainer />
     </div>
     );
   }
