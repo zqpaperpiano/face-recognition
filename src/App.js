@@ -114,7 +114,7 @@ class App extends React.Component {
         imageURL: this.state.input,
       })
 
-    fetch('https://ziqing-face-recognition.onrender.com/face-recognition-api/imageurl', {
+    fetch('https://ziqing-face-recognition.onrender.com/imageurl', {
       method: 'post',
       headers:{'Content-Type': 'application/json'},
       body: JSON.stringify({
@@ -125,7 +125,7 @@ class App extends React.Component {
       console.log(resp);
       if(resp.status != 400){
         console.log('entering...');
-        fetch('https://ziqing-face-recognition.onrender.com/face-recognition-api/image', {
+        fetch('https://ziqing-face-recognition.onrender.com/image', {
           method: 'put',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({

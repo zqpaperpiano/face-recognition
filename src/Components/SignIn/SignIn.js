@@ -26,7 +26,7 @@ class SignIn extends React.Component {
 
     onSubmitSignIn = (e) => {
         e.preventDefault();
-        fetch('https://zqpaperpiano.github.io/face-recognition-api/signin', {
+        fetch('https://ziqing-face-recognition.onrender.com/signin', {
             method: 'post',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
