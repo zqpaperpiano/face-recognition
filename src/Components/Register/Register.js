@@ -34,8 +34,12 @@ class Register extends React.Component {
 
     onSubmitRegistration = (e) => {
         e.preventDefault();
+        // console.log('register');
         if(this.validateInput()){
-            fetch('https://ziqing-face-recognition.onrender.com/register', {
+            fetch(
+                // 'https://ziqing-face-recognition.onrender.com/register', 
+                'http://localhost:10000/register',
+                {
             method: 'post',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
@@ -44,8 +48,21 @@ class Register extends React.Component {
                 password: this.state.registerPassword
             })
         })
-        .then(resp => resp.json())
+        .then(resp =>{ 
+            if(resp.status === 401){
+                toast.error("Email already exists", {
+                    position: toast.POSITION.BOTTOM_CENTER
+                })
+                return null;
+            }else if(resp.status === 400){
+                toast.error("Unable to register. Please try again later", {
+                    position: toast.POSITION.BOTTOM_CENTER
+                })
+                return null;
+            }
+            return resp.json()})
         .then(user => {
+            // console.log('data returned: ', user);
             if(user._id){
                 this.props.loadUser(user);
                 this.props.onRouteChange('home');

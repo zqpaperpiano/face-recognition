@@ -48,8 +48,8 @@ class App extends React.Component {
 
 
   calculateFaceLocation = (data) => {
-    console.log('calculate face location');
-    console.log(data);
+    // console.log('calculate face location');
+    // console.log(data);
     if(data === "No face identified"){
       toast("No face identified");
       return null;
@@ -114,7 +114,10 @@ class App extends React.Component {
         imageURL: this.state.input,
       })
 
-    fetch('https://ziqing-face-recognition.onrender.com/imageurl', {
+    fetch(
+      'https://ziqing-face-recognition.onrender.com/imageurl', 
+      // 'http://localhost:10000/imageurl', 
+      {
       method: 'post',
       headers:{'Content-Type': 'application/json'},
       body: JSON.stringify({
@@ -122,9 +125,9 @@ class App extends React.Component {
       })
     })
     .then(resp => {
-      console.log(resp);
-      if(resp.status != 400){
-        console.log('entering...');
+      // console.log(resp);
+      if(resp.status === 200){
+        // console.log('entering...');
         fetch('https://ziqing-face-recognition.onrender.com/image', {
           method: 'put',
           headers: {'Content-Type': 'application/json'},
@@ -146,6 +149,7 @@ class App extends React.Component {
     })
     .then(data => 
       {
+        // console.log(data);
         var divs = document.getElementsByClassName("bounding-box");
         // console.log(divs);
         if(divs.length > 1){

@@ -9,6 +9,7 @@
     "bcrypt": "^5.1.0",
     "bcrypt-nodejs": "^0.0.3",
     "express": "^4.18.2",
+    "node-fetch": "^2.7.0",
     "particles-bg": "^2.5.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

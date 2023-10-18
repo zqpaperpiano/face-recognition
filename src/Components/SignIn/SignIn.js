@@ -25,6 +25,7 @@ class SignIn extends React.Component {
     }
 
     onSubmitSignIn = (e) => {
+        console.log('clicked');
         e.preventDefault();
         fetch('https://ziqing-face-recognition.onrender.com/signin', {
             method: 'post',
