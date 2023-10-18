@@ -37,8 +37,8 @@ class Register extends React.Component {
         // console.log('register');
         if(this.validateInput()){
             fetch(
-                // 'https://ziqing-face-recognition.onrender.com/register', 
-                'http://localhost:10000/register',
+                'https://ziqing-face-recognition.onrender.com/register', 
+                // 'http://localhost:10000/register',
                 {
             method: 'post',
             headers: {'Content-Type': 'application/json'},
